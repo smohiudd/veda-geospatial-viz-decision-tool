@@ -29,8 +29,12 @@ A React SPA that helps users determine the best VEDA visualization service for t
 - Recommends appropriate visualization services based on:
   - **titiler-cmr**: ONLY option for CMR/Earthdata Cloud datasets
   - **tipg**: For vector data (points, lines, polygons)
-  - **titiler-pgstac**: For COG datasets
+  - **titiler-pgstac**: For COG datasets (includes API visualization endpoint)
   - **titiler-multidim**: For multidimensional gridded data (NetCDF, GRIB, HDF5)
+- **COG API Visualization**: For direct COG files, shows how to use the [OpenVEDA raster API](https://openveda.cloud/api/raster/)
+  - Tile endpoint pattern: `cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url={s3url}`
+  - Example tile URLs generated automatically
+  - Usage instructions for web mapping libraries
 - Shows limitations and use cases for each service
 - Decision logic based on the VEDA decision tree
 - JSON viewer for validation details

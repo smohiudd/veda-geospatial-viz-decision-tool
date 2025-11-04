@@ -168,6 +168,112 @@
   color: #718096;
 }
 
+.api-endpoint {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f0f9ff;
+  border-left: 3px solid #3182ce;
+  border-radius: 4px;
+}
+
+.api-endpoint.expanded {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.api-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.api-docs-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background-color: white;
+  color: #3182ce;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid #3182ce;
+}
+
+.api-docs-link:hover {
+  background-color: #3182ce;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+}
+
+.api-description {
+  margin: 8px 0;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.api-url-box {
+  background-color: #1a202c;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+
+.api-pattern {
+  color: #68d391;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  display: block;
+}
+
+.api-example-label {
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.85rem;
+}
+
+.api-example-box {
+  background-color: #1a202c;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+  overflow-x: auto;
+}
+
+.api-example {
+  color: #9ae6b4;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  display: block;
+  word-break: break-all;
+}
+
+.api-hint {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #718096;
+  font-style: italic;
+}
+
 .service-select-button {
   width: 100%;
   padding: 12px;
@@ -178,7 +284,7 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .service-select-button:hover {

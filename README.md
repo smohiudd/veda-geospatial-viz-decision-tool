@@ -9,6 +9,8 @@ A React SPA that helps users determine the best VEDA visualization service for t
   - COG validation via OpenVEDA API
   - CMR compatibility checking via AWS Lambda endpoint
 - **Step 3: Visualization Options** - Smart recommendations based on file characteristics
+  - For COG files, includes ready-to-use [OpenVEDA raster API](https://openveda.cloud/api/raster/) tile URLs
+  - For CMR datasets, recommends titiler-cmr exclusively
 
 > **Note:** Supports direct file URLs and CMR concept URLs from [Earthdata](https://cmr.earthdata.nasa.gov).
 

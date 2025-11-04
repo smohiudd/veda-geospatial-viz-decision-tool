@@ -2,6 +2,12 @@ import React from 'react';
 import './VisualizationOptions.css';
 
 function VisualizationOptions({ fileData, validationResult, onReset }) {
+  const [selectedService, setSelectedService] = React.useState(null);
+
+  const handleServiceSelect = (serviceName) => {
+    setSelectedService(selectedService === serviceName ? null : serviceName);
+  };
+
   const getRecommendedServices = () => {
     const { format, metadata, isCMR } = validationResult;
     const services = [];
@@ -19,7 +25,14 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
           'Unknown "quirky" datasets may not be supported'
         ],
         useCase: 'Best for data on Earthdata Cloud with CMR integration',
-        note: `This dataset is from Earthdata Cloud (Concept ID: ${validationResult.conceptId}). Titiler-CMR is the only compatible service for CMR datasets.`
+        note: `This dataset is from Earthdata Cloud (Concept ID: ${validationResult.conceptId}). Titiler-CMR is the only compatible service for CMR datasets.`,
+        apiEndpoint: {
+          base: 'https://staging.openveda.cloud/api/titiler-cmr/',
+          pattern: 'tiles/WebMercatorQuad/{z}/{x}/{y}.png?concept_id={concept_id}',
+          conceptId: validationResult.conceptId,
+          docsUrl: 'https://staging.openveda.cloud/api/titiler-cmr/api.html',
+          isCMR: true
+        }
       });
       return services;
     }
@@ -46,7 +59,12 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
         recommended: format === 'COG',
         limitations: [],
         useCase: 'Best for static raster datasets. Requires VEDA COG + titiler-pgstac integration',
-        note: 'Migration and metadata generation may be a pre-requisite'
+        note: 'Migration and metadata generation may be a pre-requisite',
+        apiEndpoint: format === 'COG' && !isCMR ? {
+          base: 'https://openveda.cloud/api/raster/',
+          pattern: 'cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url={url}',
+          exampleUrl: fileData.s3Url
+        } : null
       });
     }
 
@@ -95,10 +113,6 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
             <span className="info-value">{validationResult.format}</span>
           </div>
           <div className="info-item">
-            <span className="info-label">Type:</span>
-            <span className="info-value">{validationResult.metadata.spatialType}</span>
-          </div>
-          <div className="info-item">
             <span className="info-label">Cloud Optimized:</span>
             <span className="info-value">{validationResult.isCloudOptimized ? '✓ Yes' : '✗ No'}</span>
           </div>
@@ -144,28 +158,55 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
               <div className="use-case">
                 <strong>Use Case:</strong> {service.useCase}
               </div>
-              
-              {service.note && (
-                <div className="service-note">
-                  <strong>Note:</strong> {service.note}
-                </div>
-              )}
-              
-              {service.limitations.length > 0 && (
-                <div className="limitations">
-                  <strong>Limitations:</strong>
-                  <ul>
-                    {service.limitations.map((limitation, i) => (
-                      <li key={i}>{limitation}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
 
-            <button className="service-select-button">
+            <button 
+              className="service-select-button"
+              onClick={() => handleServiceSelect(service.name)}
+            >
               Select {service.name}
             </button>
+
+            {selectedService === service.name && service.apiEndpoint && (
+              <div className="api-endpoint expanded">
+                <div className="api-header">
+                  <strong>🌐 Visualization API:</strong>
+                  <a 
+                    href={service.apiEndpoint.docsUrl || 'https://openveda.cloud/api/raster/docs'}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="api-docs-link"
+                  >
+                    📖 View API Docs
+                  </a>
+                </div>
+                <p className="api-description">
+                  {service.apiEndpoint.isCMR 
+                    ? 'You can visualize this CMR dataset using the Titiler-CMR API:'
+                    : 'You can visualize this COG using the OpenVEDA raster API:'
+                  }
+                </p>
+                <div className="api-url-box">
+                  <code className="api-pattern">
+                    {service.apiEndpoint.base}
+                    <br />
+                    {service.apiEndpoint.pattern}
+                  </code>
+                </div>
+                <p className="api-example-label">Example tile URL for your dataset:</p>
+                <div className="api-example-box">
+                  <code className="api-example">
+                    {service.apiEndpoint.isCMR
+                      ? `${service.apiEndpoint.base}tiles/WebMercatorQuad/{z}/{x}/{y}.png?concept_id=${service.apiEndpoint.conceptId}`
+                      : `${service.apiEndpoint.base}cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=${encodeURIComponent(service.apiEndpoint.exampleUrl)}`
+                    }
+                  </code>
+                </div>
+                <p className="api-hint">
+                  Replace &#123;z&#125;, &#123;x&#125;, &#123;y&#125; with tile coordinates for web mapping libraries (Leaflet, Mapbox, OpenLayers, etc.)
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </div>

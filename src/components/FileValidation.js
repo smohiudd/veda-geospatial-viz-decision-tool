@@ -197,16 +197,39 @@ function FileValidation({ fileData, onValidationComplete, onBack }) {
       
       // Check example_assets to determine format
       let detectedFormat = 'Unknown';
-      if (data.example_assets && data.example_assets.length > 0) {
-        const firstAsset = data.example_assets[0];
-        const extension = firstAsset.split('.').pop().toLowerCase();
+      if (data.example_assets) {
+        let assetPath = null;
         
-        if (extension === 'tif' || extension === 'tiff') {
-          detectedFormat = 'COG';
-        } else if (extension === 'nc') {
-          detectedFormat = 'NetCDF';
-        } else {
-          detectedFormat = extension.toUpperCase();
+        // example_assets can be a string, an object where keys are filenames, or an array
+        if (typeof data.example_assets === 'string') {
+          // Case 1: Direct string
+          assetPath = data.example_assets;
+        } else if (Array.isArray(data.example_assets) && data.example_assets.length > 0) {
+          // Case 2: Array - get first item
+          assetPath = data.example_assets[0];
+        } else if (typeof data.example_assets === 'object' && !Array.isArray(data.example_assets)) {
+          // Case 3: Object where keys are filenames - get the first key
+          const keys = Object.keys(data.example_assets);
+          if (keys.length > 0) {
+            assetPath = keys[0]; // The key itself is the filename
+          }
+        }
+        
+        if (assetPath) {
+          // Remove query parameters and get just the filename
+          const filename = assetPath.split('?')[0];
+          
+          // Get extension after the last period
+          const parts = filename.split('.');
+          const extension = parts[parts.length - 1].toLowerCase();
+          
+          if (extension === 'tif' || extension === 'tiff') {
+            detectedFormat = 'COG';
+          } else if (extension === 'nc') {
+            detectedFormat = 'NetCDF';
+          } else {
+            detectedFormat = extension.toUpperCase();
+          }
         }
       }
       

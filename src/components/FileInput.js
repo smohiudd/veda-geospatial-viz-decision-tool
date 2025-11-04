@@ -110,14 +110,6 @@ function FileInput({ onSubmit }) {
           Continue to Validation
         </button>
       </form>
-
-      <div className="supported-formats">
-        <h3>Supported Input Types</h3>
-        <ul>
-          <li><strong>Direct Files</strong> - COG, NetCDF, GeoParquet, GRIB, HDF5</li>
-          <li><strong>CMR Datasets</strong> - Earthdata Cloud collections via CMR concept URLs</li>
-        </ul>
-      </div>
     </div>
   );
 }
