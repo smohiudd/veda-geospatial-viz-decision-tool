@@ -40,6 +40,15 @@
   font-size: 1rem;
 }
 
+.concept-id-value {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.9rem;
+  background-color: #f7fafc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
 .validation-details {
   margin-top: 20px;
   padding-top: 20px;

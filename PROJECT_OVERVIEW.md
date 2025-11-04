@@ -6,27 +6,34 @@ A React SPA that helps users determine the best VEDA visualization service for t
 ## Current Features
 
 ### Step 1: File Input
-- **Upload file**: Drag & drop or click to upload geospatial files
-- **S3 link**: Provide an S3 URL to a file
+- **URL Input**: Provide an S3/HTTPS URL or CMR concept URL
 - Supported formats: COG, NetCDF, GeoParquet, GRIB, HDF5
-- Input validation for S3 URLs (must start with `s3://`)
+- **CMR Support**: Detects and handles Earthdata CMR concept URLs
+- Input validation for URLs (must start with `s3://`, `http://`, or `https://`)
+- Examples and hints for both direct files and CMR concepts
 
 ### Step 2: File Validation
-- Simulated validation process with visual feedback
-- S3 accessibility check (for S3 URLs)
+- **Real COG validation** using the OpenVEDA API for .tif/.tiff files
+- **CMR compatibility checking** using AWS Lambda endpoint
+  - Parses concept ID from CMR URLs
+  - Checks compatibility via `https://v4jec6i5c0.execute-api.us-west-2.amazonaws.com/compatibility`
+  - Determines file format from `example_assets` in response
+- S3 accessibility check (simulated for direct files)
 - File format detection based on extension
-- Format-specific validation messages
 - Loading states and progress indicators
+- Error handling for failed validations
 
 ### Step 3: Visualization Options
 - Displays file metadata (format, type, cloud optimization status)
+- Shows Concept ID and source for CMR datasets
 - Recommends appropriate visualization services based on:
+  - **titiler-cmr**: ONLY option for CMR/Earthdata Cloud datasets
   - **tipg**: For vector data (points, lines, polygons)
   - **titiler-pgstac**: For COG datasets
   - **titiler-multidim**: For multidimensional gridded data (NetCDF, GRIB, HDF5)
-  - **titiler-cmr**: For Earthdata Cloud + CMR datasets
 - Shows limitations and use cases for each service
 - Decision logic based on the VEDA decision tree
+- JSON viewer for validation details
 
 ## Architecture
 
@@ -47,17 +54,17 @@ src/
 
 ## Next Steps for Enhancement
 
-### Backend Integration
+### Validation Enhancements
 1. **S3 Accessibility Check**
-   - Implement actual S3 bucket access validation
+   - Implement actual S3 bucket access validation (currently simulated)
    - Check permissions and file existence
    - Handle authentication/credentials
 
-2. **File Validation**
-   - Integrate with COG validation libraries (e.g., rio-cogeo)
-   - NetCDF validation using xarray/h5netcdf
-   - GeoParquet validation using geopandas
-   - GRIB validation using cfgrib
+2. **Additional Format Validation**
+   - ✅ COG validation (implemented with OpenVEDA API)
+   - NetCDF validation using dedicated API or library
+   - GeoParquet validation 
+   - GRIB validation
 
 3. **Metadata Extraction**
    - Extract actual metadata from files (CRS, bounds, bands, time dimensions)

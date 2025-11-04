@@ -4,16 +4,18 @@ A React SPA that helps users determine the best VEDA visualization service for t
 
 ## Features
 
-- **Step 1: File Input** - Upload files or provide S3/HTTPS URLs
-- **Step 2: Validation** - Real COG validation using OpenVEDA API, format detection
+- **Step 1: File Input** - Provide S3/HTTPS URLs to geospatial files or CMR concept URLs
+- **Step 2: Validation** - Real-time validation using multiple APIs
+  - COG validation via OpenVEDA API
+  - CMR compatibility checking via AWS Lambda endpoint
 - **Step 3: Visualization Options** - Smart recommendations based on file characteristics
 
-### Supported Formats
-- COG (Cloud Optimized GeoTIFF) - with real-time validation
-- NetCDF (Network Common Data Form)
-- GeoParquet (Columnar geospatial format)
-- GRIB (Gridded Binary)
-- HDF5 (Hierarchical Data Format)
+> **Note:** Supports direct file URLs and CMR concept URLs from [Earthdata](https://cmr.earthdata.nasa.gov).
+
+### Supported Input Types
+- **Direct Files:** COG, NetCDF, GeoParquet, GRIB, HDF5 (via S3/HTTPS URLs)
+- **CMR Datasets:** Earthdata Cloud collections via CMR concept URLs
+  - Example: `https://cmr.earthdata.nasa.gov/search/concepts/C1996881146-POCLOUD.html`
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

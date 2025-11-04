@@ -16,67 +16,134 @@ function FileValidation({ fileData, onValidationComplete, onBack }) {
     let isValid = true;
     let validationDetails = null;
 
-    // Step 1: S3 Accessibility Check (if S3)
-    if (fileData.type === 's3') {
-      steps.push({ name: 'S3 Accessibility Check', status: 'running' });
+    // Handle CMR URLs differently
+    if (fileData.type === 'cmr') {
+      // Step 1: Parse Concept ID
+      steps.push({ name: 'Parse CMR Concept ID', status: 'running' });
       setValidationSteps([...steps]);
       
-      await simulateDelay(1500);
-      steps[0].status = 'completed';
-      steps[0].message = 'S3 bucket is accessible';
-      setValidationSteps([...steps]);
-    }
-
-    // Step 2: File Format Detection
-    await simulateDelay(1000);
-    steps.push({ name: 'File Format Detection', status: 'running' });
-    setValidationSteps([...steps]);
-    
-    await simulateDelay(500);
-    const detectedFormat = detectFileFormat(fileData.fileName);
-    steps[steps.length - 1].status = 'completed';
-    steps[steps.length - 1].message = `Detected format: ${detectedFormat}`;
-    setValidationSteps([...steps]);
-
-    // Step 3: Format-Specific Validation
-    await simulateDelay(500);
-    steps.push({ name: `${detectedFormat} Validation`, status: 'running' });
-    setValidationSteps([...steps]);
-    
-    // Actual COG validation using API
-    if (detectedFormat === 'COG' && fileData.type === 's3') {
-      try {
-        const validationResult = await validateCOG(fileData.s3Url);
-        isValid = validationResult.isValid;
-        validationDetails = validationResult.details;
-        
-        steps[steps.length - 1].status = isValid ? 'completed' : 'failed';
-        steps[steps.length - 1].message = validationResult.message;
-      } catch (error) {
-        steps[steps.length - 1].status = 'failed';
-        steps[steps.length - 1].message = `Validation error: ${error.message}`;
+      await simulateDelay(500);
+      const conceptId = parseCMRConceptId(fileData.s3Url);
+      
+      if (!conceptId) {
+        steps[0].status = 'failed';
+        steps[0].message = 'Failed to parse concept ID from URL';
+        setValidationSteps([...steps]);
+        setIsValidating(false);
         isValid = false;
+      } else {
+        steps[0].status = 'completed';
+        steps[0].message = `Concept ID: ${conceptId}`;
+        setValidationSteps([...steps]);
+        
+        // Step 2: Check CMR Compatibility
+        await simulateDelay(500);
+        steps.push({ name: 'Check CMR Compatibility', status: 'running' });
+        setValidationSteps([...steps]);
+        
+        try {
+          const compatibilityResult = await validateCMRCompatibility(conceptId);
+          isValid = compatibilityResult.isValid;
+          validationDetails = compatibilityResult.details;
+          const detectedFormat = compatibilityResult.format;
+          
+          steps[steps.length - 1].status = 'completed';
+          steps[steps.length - 1].message = compatibilityResult.message;
+          setValidationSteps([...steps]);
+          setIsValidating(false);
+          
+          // Complete validation
+          setTimeout(() => {
+            onValidationComplete({
+              format: detectedFormat,
+              isValid: isValid,
+              isCloudOptimized: true, // CMR datasets are on Earthdata Cloud
+              isCMR: true,
+              conceptId: conceptId,
+              metadata: {
+                format: detectedFormat,
+                hasTimeDimension: detectedFormat === 'NetCDF',
+                spatialType: 'raster',
+                hasMultipleBands: true,
+                source: 'Earthdata Cloud'
+              },
+              validationDetails: validationDetails
+            });
+          }, 1000);
+          return;
+        } catch (error) {
+          steps[steps.length - 1].status = 'failed';
+          steps[steps.length - 1].message = `Compatibility check error: ${error.message}`;
+          setValidationSteps([...steps]);
+          setIsValidating(false);
+          isValid = false;
+        }
       }
     } else {
-      // For non-COG formats or uploaded files, use simulated validation
-      await simulateDelay(2000);
-      steps[steps.length - 1].status = 'completed';
-      steps[steps.length - 1].message = getFormatValidationMessage(detectedFormat);
-    }
-    
-    setValidationSteps([...steps]);
-    setIsValidating(false);
+      // Original flow for direct file URLs
+      // Step 1: S3 Accessibility Check (if S3)
+      if (fileData.type === 's3') {
+        steps.push({ name: 'S3 Accessibility Check', status: 'running' });
+        setValidationSteps([...steps]);
+        
+        await simulateDelay(1500);
+        steps[0].status = 'completed';
+        steps[0].message = 'S3 bucket is accessible';
+        setValidationSteps([...steps]);
+      }
 
-    // Complete validation
-    setTimeout(() => {
-      onValidationComplete({
-        format: detectedFormat,
-        isValid: isValid,
-        isCloudOptimized: isValid && checkCloudOptimized(detectedFormat),
-        metadata: getMetadata(detectedFormat),
-        validationDetails: validationDetails
-      });
-    }, 1000);
+      // Step 2: File Format Detection
+      await simulateDelay(1000);
+      steps.push({ name: 'File Format Detection', status: 'running' });
+      setValidationSteps([...steps]);
+      
+      await simulateDelay(500);
+      const detectedFormat = detectFileFormat(fileData.fileName);
+      steps[steps.length - 1].status = 'completed';
+      steps[steps.length - 1].message = `Detected format: ${detectedFormat}`;
+      setValidationSteps([...steps]);
+
+      // Step 3: Format-Specific Validation
+      await simulateDelay(500);
+      steps.push({ name: `${detectedFormat} Validation`, status: 'running' });
+      setValidationSteps([...steps]);
+      
+      // Actual COG validation using API
+      if (detectedFormat === 'COG' && fileData.type === 's3') {
+        try {
+          const validationResult = await validateCOG(fileData.s3Url);
+          isValid = validationResult.isValid;
+          validationDetails = validationResult.details;
+          
+          steps[steps.length - 1].status = isValid ? 'completed' : 'failed';
+          steps[steps.length - 1].message = validationResult.message;
+        } catch (error) {
+          steps[steps.length - 1].status = 'failed';
+          steps[steps.length - 1].message = `Validation error: ${error.message}`;
+          isValid = false;
+        }
+      } else {
+        // For non-COG formats, use simulated validation
+        await simulateDelay(2000);
+        steps[steps.length - 1].status = 'completed';
+        steps[steps.length - 1].message = getFormatValidationMessage(detectedFormat);
+      }
+      
+      setValidationSteps([...steps]);
+      setIsValidating(false);
+
+      // Complete validation
+      setTimeout(() => {
+        onValidationComplete({
+          format: detectedFormat,
+          isValid: isValid,
+          isCloudOptimized: isValid && checkCloudOptimized(detectedFormat),
+          isCMR: false,
+          metadata: getMetadata(detectedFormat),
+          validationDetails: validationDetails
+        });
+      }, 1000);
+    }
   };
 
   const simulateDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -106,6 +173,52 @@ function FileValidation({ fileData, onValidationComplete, onBack }) {
     } catch (error) {
       console.error('COG Validation Error:', error);
       throw new Error(error.message || 'Failed to validate COG');
+    }
+  };
+
+  const parseCMRConceptId = (url) => {
+    // Extract concept ID from CMR URL
+    // Example: https://cmr.earthdata.nasa.gov/search/concepts/C1996881146-POCLOUD.html
+    const match = url.match(/concepts\/([^/.]+)/);
+    return match ? match[1] : null;
+  };
+
+  const validateCMRCompatibility = async (conceptId) => {
+    try {
+      const apiUrl = `https://v4jec6i5c0.execute-api.us-west-2.amazonaws.com/compatibility?concept_id=${encodeURIComponent(conceptId)}`;
+      
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Check example_assets to determine format
+      let detectedFormat = 'Unknown';
+      if (data.example_assets && data.example_assets.length > 0) {
+        const firstAsset = data.example_assets[0];
+        const extension = firstAsset.split('.').pop().toLowerCase();
+        
+        if (extension === 'tif' || extension === 'tiff') {
+          detectedFormat = 'COG';
+        } else if (extension === 'nc') {
+          detectedFormat = 'NetCDF';
+        } else {
+          detectedFormat = extension.toUpperCase();
+        }
+      }
+      
+      return {
+        isValid: true,
+        format: detectedFormat,
+        message: `Compatible CMR dataset with ${detectedFormat} format`,
+        details: data
+      };
+    } catch (error) {
+      console.error('CMR Validation Error:', error);
+      throw new Error(error.message || 'Failed to validate CMR compatibility');
     }
   };
 

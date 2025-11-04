@@ -3,10 +3,28 @@ import './VisualizationOptions.css';
 
 function VisualizationOptions({ fileData, validationResult, onReset }) {
   const getRecommendedServices = () => {
-    const { format, metadata } = validationResult;
+    const { format, metadata, isCMR } = validationResult;
     const services = [];
 
-    // Based on the decision tree from the image
+    // For CMR datasets, ONLY recommend titiler-cmr
+    if (isCMR) {
+      services.push({
+        name: 'titiler-cmr',
+        title: 'Titiler-CMR',
+        description: 'For data on Earthdata Cloud with CMR metadata',
+        recommended: true,
+        limitations: [
+          'Only role-based support for GRIB datasets', 
+          'Datasets with hierarchical/grouped structure may not be supported', 
+          'Unknown "quirky" datasets may not be supported'
+        ],
+        useCase: 'Best for data on Earthdata Cloud with CMR integration',
+        note: `This dataset is from Earthdata Cloud (Concept ID: ${validationResult.conceptId}). Titiler-CMR is the only compatible service for CMR datasets.`
+      });
+      return services;
+    }
+
+    // Based on the decision tree from the image for non-CMR datasets
     if (metadata.spatialType === 'vector') {
       // Points, lines, polygons -> tipg
       services.push({
@@ -57,20 +75,6 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
       }
     }
 
-    // Check for Earthdata Cloud + CMR
-    // This is a placeholder - in real implementation, you'd check the S3 bucket
-    if (fileData.type === 's3' && fileData.s3Url.includes('earthdata')) {
-      services.push({
-        name: 'titiler-cmr',
-        title: 'Titiler-CMR',
-        description: 'For data on Earthdata Cloud with CMR metadata',
-        recommended: true,
-        limitations: ['Only role-based for GRIB datasets', 'Datasets with hierarchical/grouped structure may not be supported', 'Unknown "quirky" datasets may not be supported'],
-        useCase: 'Best for data on Earthdata Cloud with CMR integration',
-        note: 'Example: MiCASA datasets'
-      });
-    }
-
     return services;
   };
 
@@ -102,6 +106,18 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
             <span className="info-label">Time Dimension:</span>
             <span className="info-value">{validationResult.metadata.hasTimeDimension ? '✓ Yes' : '✗ No'}</span>
           </div>
+          {validationResult.isCMR && (
+            <>
+              <div className="info-item">
+                <span className="info-label">Source:</span>
+                <span className="info-value">Earthdata Cloud (CMR)</span>
+              </div>
+              <div className="info-item concept-id-item">
+                <span className="info-label">Concept ID:</span>
+                <span className="info-value concept-id-value">{validationResult.conceptId}</span>
+              </div>
+            </>
+          )}
         </div>
         
         {validationResult.validationDetails && (

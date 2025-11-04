@@ -72,7 +72,7 @@ function Wizard() {
   return (
     <div className="wizard-container">
       <header className="wizard-header">
-        <h1>Geospatial File Decision Tool</h1>
+        <h1>VEDA Geospatial File Decision Tool</h1>
         <p className="wizard-subtitle">
           Upload a geospatial file or provide an S3 link to get visualization recommendations
         </p>

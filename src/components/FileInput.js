@@ -2,114 +2,107 @@ import React, { useState } from 'react';
 import './FileInput.css';
 
 function FileInput({ onSubmit }) {
-  const [inputType, setInputType] = useState('upload'); // 'upload' or 's3'
-  const [s3Url, setS3Url] = useState('');
-  const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState('');
   const [error, setError] = useState('');
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setError('');
+  const exampleUrls = [
+    {
+      label: 'CMR - LPCLOUD',
+      url: 'https://cmr.earthdata.nasa.gov/search/concepts/C2021957295-LPCLOUD.html'
+    },
+    {
+      label: 'CMR - POCLOUD',
+      url: 'https://cmr.earthdata.nasa.gov/search/concepts/C2036881735-POCLOUD.html'
+    },
+    {
+      label: 'COG - Bangladesh Landcover',
+      url: 's3://veda-data-store/bangladesh-landcover-2001-2020/MODIS_LC_2001_BD_v2.cog.tif'
     }
+  ];
+
+  const handleUrlChange = (e) => {
+    setFileUrl(e.target.value);
+    setError('');
   };
 
-  const handleS3UrlChange = (e) => {
-    setS3Url(e.target.value);
+  const handleExampleClick = (url) => {
+    setFileUrl(url);
     setError('');
+  };
+
+  const detectUrlType = (url) => {
+    if (url.includes('cmr.earthdata.nasa.gov/search/concepts/')) {
+      return 'cmr';
+    }
+    return 's3';
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (inputType === 'upload' && !file) {
-      setError('Please select a file to upload');
-      return;
-    }
-    
-    if (inputType === 's3' && !s3Url.trim()) {
+    if (!fileUrl.trim()) {
       setError('Please enter a file URL');
       return;
     }
 
-    if (inputType === 's3' && !(s3Url.startsWith('s3://') || s3Url.startsWith('http://') || s3Url.startsWith('https://'))) {
+    if (!(fileUrl.startsWith('s3://') || fileUrl.startsWith('http://') || fileUrl.startsWith('https://'))) {
       setError('URL must start with s3://, http://, or https://');
       return;
     }
 
+    const urlType = detectUrlType(fileUrl);
+
     onSubmit({
-      type: inputType,
-      file: inputType === 'upload' ? file : null,
-      s3Url: inputType === 's3' ? s3Url : null,
-      fileName: inputType === 'upload' ? file.name : s3Url.split('/').pop()
+      type: urlType,
+      file: null,
+      s3Url: fileUrl,
+      fileName: fileUrl.split('/').pop()
     });
   };
 
   return (
     <div className="file-input-container">
-      <h2>Step 1: Provide Your Geospatial File</h2>
+      <h2>Step 1: Provide Your Geospatial File URL</h2>
       <p className="step-description">
-        Upload a file or provide an S3 link to a geospatial dataset
+        Provide an S3 or HTTPS URL to a geospatial dataset for validation
       </p>
 
-      <div className="input-type-selector">
-        <button
-          className={`type-button ${inputType === 'upload' ? 'active' : ''}`}
-          onClick={() => setInputType('upload')}
-        >
-          Upload File
-        </button>
-        <button
-          className={`type-button ${inputType === 's3' ? 'active' : ''}`}
-          onClick={() => setInputType('s3')}
-        >
-          S3 Link
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit} className="file-input-form">
-        {inputType === 'upload' ? (
-          <div className="upload-section">
-            <label htmlFor="file-upload" className="file-upload-label">
-              <div className="upload-box">
-                <svg className="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <p className="upload-text">
-                  {file ? file.name : 'Click to upload or drag and drop'}
-                </p>
-                <p className="upload-hint">
-                  COG, NetCDF, GeoParquet, GRIB, HDF5 files
-                </p>
-              </div>
-            </label>
-            <input
-              id="file-upload"
-              type="file"
-              onChange={handleFileChange}
-              className="file-input-hidden"
-              accept=".tif,.tiff,.nc,.parquet,.grib,.hdf5,.h5"
-            />
+        <div className="url-section">
+          <label htmlFor="file-url" className="url-label">
+            File URL (S3 or HTTPS)
+          </label>
+          <input
+            id="file-url"
+            type="text"
+            value={fileUrl}
+            onChange={handleUrlChange}
+            placeholder="https://example.com/path/to/file.tif"
+            className="url-input"
+          />
+          <div className="examples-section">
+            <p className="examples-label">Try these examples:</p>
+            <div className="example-buttons">
+              {exampleUrls.map((example, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="example-button"
+                  onClick={() => handleExampleClick(example.url)}
+                  title={example.url}
+                >
+                  {example.label}
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="s3-section">
-            <label htmlFor="s3-url" className="s3-label">
-              File URL (S3 or HTTPS)
-            </label>
-            <input
-              id="s3-url"
-              type="text"
-              value={s3Url}
-              onChange={handleS3UrlChange}
-              placeholder="https://example.com/path/to/file.tif"
-              className="s3-input"
-            />
-            <p className="s3-hint">
-              Example: https://openveda.cloud/data/my-file.tif or s3://my-bucket/data/file.nc
-            </p>
+          <div className="url-info">
+            <svg className="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Supports direct file URLs (COG, NetCDF, etc.) and CMR concept URLs from Earthdata. Real-time validation will be performed.</span>
           </div>
-        )}
+        </div>
 
         {error && <div className="error-message">{error}</div>}
 
@@ -119,13 +112,10 @@ function FileInput({ onSubmit }) {
       </form>
 
       <div className="supported-formats">
-        <h3>Supported Formats</h3>
+        <h3>Supported Input Types</h3>
         <ul>
-          <li><strong>COG</strong> - Cloud Optimized GeoTIFF</li>
-          <li><strong>NetCDF</strong> - Network Common Data Form</li>
-          <li><strong>GeoParquet</strong> - Columnar geospatial format</li>
-          <li><strong>GRIB</strong> - Gridded Binary</li>
-          <li><strong>HDF5</strong> - Hierarchical Data Format</li>
+          <li><strong>Direct Files</strong> - COG, NetCDF, GeoParquet, GRIB, HDF5</li>
+          <li><strong>CMR Datasets</strong> - Earthdata Cloud collections via CMR concept URLs</li>
         </ul>
       </div>
     </div>
