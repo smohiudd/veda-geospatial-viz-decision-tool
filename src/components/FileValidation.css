@@ -1,0 +1,132 @@
+.validation-container h2 {
+  color: #1a202c;
+  margin-bottom: 10px;
+}
+
+.validation-steps {
+  margin: 40px 0;
+}
+
+.validation-step {
+  display: flex;
+  align-items: flex-start;
+  padding: 20px;
+  margin-bottom: 15px;
+  background-color: #f7fafc;
+  border-radius: 8px;
+  border-left: 4px solid #cbd5e0;
+  transition: all 0.3s ease;
+}
+
+.validation-step.running {
+  border-left-color: #3182ce;
+  background-color: #ebf8ff;
+}
+
+.validation-step.completed {
+  border-left-color: #48bb78;
+  background-color: #f0fff4;
+}
+
+.validation-step.failed {
+  border-left-color: #f56565;
+  background-color: #fff5f5;
+}
+
+.step-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3182ce;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.check-icon {
+  width: 24px;
+  height: 24px;
+  color: #48bb78;
+}
+
+.error-icon {
+  width: 24px;
+  height: 24px;
+  color: #f56565;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-name {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 5px;
+}
+
+.step-message {
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.validation-complete {
+  text-align: center;
+  padding: 30px;
+  margin: 30px 0;
+}
+
+.success-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  background-color: #f0fff4;
+  border-radius: 8px;
+  color: #22543d;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.success-icon {
+  width: 32px;
+  height: 32px;
+  color: #48bb78;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.back-button {
+  padding: 12px 24px;
+  background-color: #e2e8f0;
+  color: #2d3748;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #cbd5e0;
+}
+
