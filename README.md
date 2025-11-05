@@ -14,12 +14,6 @@ A React SPA that helps users determine the best VEDA visualization service for t
 
 > **Note:** Supports direct file URLs and CMR concept URLs from [Earthdata](https://cmr.earthdata.nasa.gov).
 
-### Supported Input Types
-- **Direct Files:** COG, NetCDF, GeoParquet, GRIB, HDF5 (via S3/HTTPS URLs)
-- **CMR Datasets:** Earthdata Cloud collections via CMR concept URLs
-  - Example: `https://cmr.earthdata.nasa.gov/search/concepts/C1996881146-POCLOUD.html`
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Running the App
 
