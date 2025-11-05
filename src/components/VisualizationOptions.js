@@ -53,6 +53,8 @@ function ServiceCard({ service }) {
 }
 
 function VisualizationOptions({ fileData, validationResult, onReset }) {
+  const [showValidationDetails, setShowValidationDetails] = React.useState(false);
+
   const getRecommendedServices = () => {
     const { format, metadata, isCMR } = validationResult;
     const services = [];
@@ -67,6 +69,14 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
           base: 'https://staging.openveda.cloud/api/titiler-cmr/',
           pattern: 'tiles/WebMercatorQuad/{z}/{x}/{y}.png?concept_id={concept_id}',
           exampleUrl: `https://staging.openveda.cloud/api/titiler-cmr/tiles/WebMercatorQuad/{z}/{x}/{y}.png?concept_id=${validationResult.conceptId}`
+        },
+        {
+          name: 'statistics',
+          title: 'Statistics',
+          description: 'Generate statistical summaries for the dataset',
+          base: 'https://staging.openveda.cloud/api/titiler-cmr/',
+          pattern: 'statistics?concept_id={concept_id}&datetime={datetime}',
+          exampleUrl: `https://staging.openveda.cloud/api/titiler-cmr/statistics?concept_id=${validationResult.conceptId}&datetime=2020-01-01`
         }
       ];
 
@@ -84,7 +94,7 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
         endpoints.push({
           name: 'time-series-statistics',
           title: 'Time Series Statistics',
-          description: 'Generate statistics over time',
+          description: 'Generate statistics over time for multiple dates',
           base: 'https://staging.openveda.cloud/api/titiler-cmr/',
           pattern: 'timeseries/statistics?concept_id={concept_id}&datetime={datetime}',
           exampleUrl: `https://staging.openveda.cloud/api/titiler-cmr/timeseries/statistics?concept_id=${validationResult.conceptId}&datetime=2020-01-01/2020-12-31`
@@ -208,15 +218,6 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
             </>
           )}
         </div>
-        
-        {validationResult.validationDetails && (
-          <div className="validation-details">
-            <h4>Validation Details</h4>
-            <pre className="validation-json">
-              {JSON.stringify(validationResult.validationDetails, null, 2)}
-            </pre>
-          </div>
-        )}
       </div>
 
       <h3 className="services-heading">Recommended Services</h3>
@@ -228,6 +229,25 @@ function VisualizationOptions({ fileData, validationResult, onReset }) {
           />
         ))}
       </div>
+
+      {validationResult.validationDetails && (
+        <div className="validation-details-section">
+          <button 
+            className="validation-details-toggle"
+            onClick={() => setShowValidationDetails(!showValidationDetails)}
+          >
+            <span className="toggle-icon">{showValidationDetails ? '▼' : '▶'}</span>
+            <span>Validation Details</span>
+          </button>
+          {showValidationDetails && (
+            <div className="validation-details-content">
+              <pre className="validation-json">
+                {JSON.stringify(validationResult.validationDetails, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="decision-tree-info">
         <h4>Decision Logic</h4>
